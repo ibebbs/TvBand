@@ -1,6 +1,9 @@
 ﻿{
   "dependencies": {
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0"
+    "Caliburn.Micro.Start": "3.0.0",
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
+    "Newtonsoft.Json": "8.0.3",
+    "Rx-Main": "2.2.5"
   },
   "frameworks": {
     "uap10.0": {}
