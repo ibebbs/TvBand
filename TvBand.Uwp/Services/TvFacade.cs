@@ -1,29 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reactive.Linq;
+using TvBand.Uwp.Models;
 
 namespace TvBand.Uwp.Services
 {
     public interface ITvFacade
     {
-        IObservable<Models.ITvState> TvState { get; }
+        IObservable<ITvState> TvState { get; }
     }
 
     internal class TvFacade : ITvFacade
     {
-        private IObservable<Models.TvState> _tvState;
-
-        public TvFacade(IObservable<Models.TvSettings> settings)
+        public TvFacade(IObservable<TvSettings> settings, ITvBridgeFactory tvBridgeFactory)
         {
-            _tvState = settings
-                .Select(s => )
+            var tvBridge = settings
+                .Select(s => tvBridgeFactory.Create(s))
+                .Publish()
+                .RefCount();
+
+            IObservable<Func<TvState, TvState>> sources = tvBridge.Select(bridge => bridge.Sources).Switch().Select(s => WithSources(s));
+            IObservable<Func<TvState, TvState>> connectedToTv = tvBridge.Select(bridge => bridge.Connected).Switch().Select(s => WithConnectedToTv(s));
+
+            TvState = Observable
+                .Merge(sources, connectedToTv)
+                .Scan(new TvState(), (s, f) => f(s))
+                .Cast<ITvState>()
+                .Publish()
+                .RefCount();
         }
 
-        public IObservable<Models.TvState> TvState
+        private Func<TvState, TvState> WithConnectedToTv(bool connectedToTv)
         {
-            get { _tvState; }
+            return readModel => readModel.WithConnectedToTv(connectedToTv);
         }
+
+        private Func<TvState, TvState> WithSources(IEnumerable<Common.ITvSource> sources)
+        {
+            return readModel => readModel.WithSources(sources);
+        }
+
+        public IObservable<ITvState> TvState { get; private set; }
     }
 }

@@ -17,7 +17,7 @@ namespace TvBand.Uwp.Services
 {
     public interface IObservableRestClient
     {
-        IObservable<T> Get<T>(Uri uri);
+        IObservable<T> Get<T>(Uri uri, Func<Stream, Task<T>> deserializer = null);
 
         IObservable<Unit> Post<T>(Uri uri, T value);
     }
@@ -43,20 +43,29 @@ namespace TvBand.Uwp.Services
             return source.Content;
         }
 
-        private static async Task<T> DeserializeContent<T>(HttpContent content)
+        private static Task<T> DeserializeContent<T>(Stream stream)
         {
-            Stream stream = await content.ReadAsStreamAsync();
-
             using (StreamReader streamReader = new StreamReader(stream))
             {
                 using (JsonReader jsonReader = new JsonTextReader(streamReader))
                 {
-                    return _serializer.Deserialize<T>(jsonReader);
+                    return Task.FromResult(_serializer.Deserialize<T>(jsonReader));
                 }
             }
         }
 
-        public IObservable<T> Get<T>(Uri resource)
+        private static async Task<T> DeserializeContent<T>(HttpContent content, Func<Stream, Task<T>> deserializer)
+        {
+            deserializer = deserializer ?? DeserializeContent<T>;
+
+            Stream stream = await content.ReadAsStreamAsync();
+
+            T result = await deserializer(stream);
+
+            return result;
+        }
+
+        public IObservable<T> Get<T>(Uri resource, Func<Stream, Task<T>> deserializer = null)
         {
             return Observable.Create<T>(
                 observer =>
@@ -76,7 +85,7 @@ namespace TvBand.Uwp.Services
                         request.Disposable = Observable
                             .FromAsync(() => client.GetAsync(requestUri))
                             .Select(ContentFromHttpResponseMessage)
-                            .SelectMany(content => DeserializeContent<T>(content))
+                            .SelectMany(content => DeserializeContent<T>(content, deserializer))
                             .SubscribeOn(_scheduler)
                             .Subscribe(observer);
                     }

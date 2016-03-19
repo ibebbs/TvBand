@@ -5,9 +5,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Text;
-using System.Threading.Tasks;
-using TvBand.Uwp.Common;
+using TvBand.Common;
 
 namespace TvBand.Uwp.Services
 {
@@ -17,35 +15,45 @@ namespace TvBand.Uwp.Services
 
         IObservable<bool> Connected { get; }
 
-        IObservable<IEnumerable<Source>> Sources { get; }
+        IObservable<IEnumerable<ITvSource>> Sources { get; }
 
-        ISubject<Source, Source> CurrentSource { get; }
+        ISubject<ITvSource, ITvSource> CurrentSource { get; }
     }
 
     internal class TvBridge : ITvBridge
     {
-        private static readonly Uri System = new Uri("1/system", UriKind.Relative);
+        private static readonly Uri SystemUri = new Uri("1/system", UriKind.Relative);
+        private static readonly Uri SourcesUri = new Uri("1/sources", UriKind.Relative);
 
         private enum Change
         {
             PowerToggled
         }
 
-        private IConnectableObservable<bool> _connected;
-        private Subject<Change> _changes;
+        private readonly IConnectableObservable<bool> _connected;
+        private readonly Subject<Change> _changes;
 
         public TvBridge(IObservableRestClient observableRestClient, Models.ITvSettings settings)
         {
+            _changes = new Subject<Change>();
+
             _connected = Observable
                 .Interval(TimeSpan.FromSeconds(10))
                 .StartWith(0)
-                .SelectMany(observableRestClient.Get<Dto.System>(System).Select(Option.Some).OnErrorResumeNext(Observable.Return(Option.None<Dto.System>())))
+                .SelectMany(_ => observableRestClient.Get<Philips.Dto.System>(SystemUri).Select(Option.Some).OnErrorResumeNext(Observable.Return(Option.None<Philips.Dto.System>())))
                 .Select(option => option.IsSome)
                 .Publish();
 
+            PowerStateChanged = Subject.Create(
+                Observer.Create<Unit>(_ => TogglePower(observableRestClient)), 
+                _changes.Where(change => change == Change.PowerToggled).Select(_ => Unit.Default)
+            );
 
-
-            PowerStateChanged = Subject.Create(Observer.Create<Unit>(_ => TogglePower(observableRestClient)), _changes.Where(change => change == Change.PowerToggled).Select(_ => Unit.Default));
+            Sources = _connected
+                .Where(connected => connected)
+                .SelectMany(_ => observableRestClient.Get(SourcesUri, Philips.Dto.Serialization.DeserializeSources))
+                .Publish()
+                .RefCount();
         }
 
         private void TogglePower(IObservableRestClient observableRestClient)
@@ -67,6 +75,8 @@ namespace TvBand.Uwp.Services
 
         public ISubject<Unit,Unit> PowerStateChanged { get; private set; }
 
-        public IObservable<IEnumerable<Source>> Sources { get; private set; }
+        public IObservable<IEnumerable<ITvSource>> Sources { get; private set; }
+
+        public ISubject<ITvSource, ITvSource> CurrentSource { get; }
     }
 }

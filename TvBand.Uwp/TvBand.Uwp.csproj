@@ -95,15 +95,13 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Common\Option.cs" />
-    <Compile Include="Common\PowerState.cs" />
-    <Compile Include="Common\Source.cs" />
-    <Compile Include="Dto\System.cs" />
     <Compile Include="Models\TvSettings.cs" />
     <Compile Include="Models\TvState.cs" />
+    <Compile Include="Models\TvStateMutators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ObservableRestClient.cs" />
     <Compile Include="Services\TvBridge.cs" />
+    <Compile Include="Services\TvBridgeFactory.cs" />
     <Compile Include="Services\TvFacade.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
@@ -138,6 +136,16 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TvBand.Common\TvBand.Common.csproj">
+      <Project>{6c04e5a1-adc2-4e64-881f-6a5d3967c879}</Project>
+      <Name>TvBand.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TvBand.Philips\TvBand.Philips.csproj">
+      <Project>{7df2ee1f-f9ae-4bd6-8905-a872d1846da2}</Project>
+      <Name>TvBand.Philips</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
