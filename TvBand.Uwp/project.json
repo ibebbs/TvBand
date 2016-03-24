@@ -1,6 +1,7 @@
 ﻿{
   "dependencies": {
-    "Caliburn.Micro.Start": "3.0.0",
+    "Caliburn.Micro.Reactive.Extensions": "3.0.0.3-beta",
+    "Caliburn.Micro.Start": "3.0.0-beta2",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
     "Newtonsoft.Json": "8.0.3",
     "Rx-Main": "2.2.5"
