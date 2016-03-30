@@ -11,8 +11,6 @@ namespace TvBand.Uwp.Services
 {
     public interface ITvBridge
     {
-        IDisposable Connect();
-
         IObservable<bool> Connected { get; }
 
         IObservable<IEnumerable<ITvSource>> Sources { get; }
@@ -30,19 +28,29 @@ namespace TvBand.Uwp.Services
             PowerToggled
         }
 
-        private readonly IConnectableObservable<bool> _connected;
+        private readonly IObservable<bool> _connected;
+        private readonly Subject<Unit> _disconnected;
         private readonly Subject<Change> _changes;
 
-        public TvBridge(IObservableRestClient observableRestClient, Models.ITvSettings settings)
+        public TvBridge(IObservableRestClientFactory observableRestClientFactory, Models.ITvSettings settings)
         {
-            _changes = new Subject<Change>();
+            IObservableRestClient observableRestClient = observableRestClientFactory.Create(new UriBuilder("http", settings.TvAddress.Address.ToString(), settings.TvAddress.Port).Uri);
 
-            _connected = Observable
-                .Interval(TimeSpan.FromSeconds(10))
-                .StartWith(0)
-                .SelectMany(_ => observableRestClient.Get<Philips.Dto.System>(SystemUri).Select(Option.Some).OnErrorResumeNext(Observable.Return(Option.None<Philips.Dto.System>())))
-                .Select(option => option.IsSome)
-                .Publish();
+            _changes = new Subject<Change>();
+            _disconnected = new Subject<Unit>();
+
+            _connected = _disconnected
+                .StartWith(Unit.Default)
+                .Throttle(TimeSpan.FromMilliseconds(500))
+                .Select(disconnection => Observable
+                    .Interval(settings.ReconnectionInterval)
+                    .StartWith(0)
+                    .SelectMany(interval => observableRestClient.Get<Philips.Dto.System>(SystemUri).Select(Option.Some).Catch<Option<Philips.Dto.System>, Exception>(ex => Observable.Return(Option.None<Philips.Dto.System>())))
+                    .Select(option => option.IsSome)
+                    .TakeWhile(connected => !connected))
+                .Switch()
+                .Publish()
+                .RefCount();
 
             PowerStateChanged = Subject.Create(
                 Observer.Create<Unit>(_ => TogglePower(observableRestClient)), 
@@ -51,7 +59,8 @@ namespace TvBand.Uwp.Services
 
             Sources = _connected
                 .Where(connected => connected)
-                .SelectMany(_ => observableRestClient.Get(SourcesUri, Philips.Dto.Serialization.DeserializeSources))
+                .Select(_ => observableRestClient.Get(SourcesUri, Philips.Dto.Serialization.DeserializeSources).HandleDisconnect(_disconnected))
+                .Switch()
                 .Publish()
                 .RefCount();
         }
@@ -59,13 +68,6 @@ namespace TvBand.Uwp.Services
         private void TogglePower(IObservableRestClient observableRestClient)
         {
             _changes.OnNext(Change.PowerToggled);
-        }
-
-        public IDisposable Connect()
-        {
-            return new CompositeDisposable(
-                _connected.Connect()
-            );
         }
 
         public IObservable<bool> Connected
@@ -78,5 +80,19 @@ namespace TvBand.Uwp.Services
         public IObservable<IEnumerable<ITvSource>> Sources { get; private set; }
 
         public ISubject<ITvSource, ITvSource> CurrentSource { get; }
+    }
+
+    public static class TvBridgeExtension
+    {
+        public static IObservable<T> HandleDisconnect<T>(this IObservable<T> source, IObserver<Unit> disconnection)
+        {
+            return source.Catch<T, Exception>(
+                ex =>
+                {
+                    disconnection.OnNext(Unit.Default);
+                    return Observable.Return(default(T));
+                }
+            );
+        }
     }
 }

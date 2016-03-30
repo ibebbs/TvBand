@@ -10,7 +10,29 @@
 
     <SplitView IsPaneOpen="{Binding PaneOpen}" DisplayMode="CompactOverlay" CompactPaneLength="50" OpenPaneLength="250">
         <SplitView.Content>
-            <Frame cm:Message.Attach="[Event Loaded] = [SetupNavigationService($source)]" DataContext="{x:Null}" />
+            <Grid>
+                <!--Frame cm:Message.Attach="[Event Loaded] = [SetupNavigationService($source)]" DataContext="{x:Null}" /-->
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Connected To TV:" Grid.Column="0" Grid.Row="0" Margin="4" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Path=ConnectedToTv, FallbackValue=False}" Grid.Column="1" Grid.Row="0" Margin="4" FontWeight="ExtraBold"/>
+                    <TextBlock Text="Sources:" Grid.Column="0" Grid.Row="1" Margin="4" VerticalAlignment="Center"/>
+                    <ComboBox ItemsSource="{Binding Sources}" Grid.Column="1" Grid.Row="1" Margin="4" MinWidth="150">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </Grid>
+            </Grid>
         </SplitView.Content>
         <SplitView.Pane>
             <Grid VerticalAlignment="Stretch">

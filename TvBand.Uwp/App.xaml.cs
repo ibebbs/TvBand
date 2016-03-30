@@ -32,6 +32,10 @@ namespace TvBand.Uwp
             _container.RegisterWinRTServices();
 
             // Make sure to register your containers here
+            _container.Singleton<Services.ITvFacadeFactory, Services.TvFacadeFactory>();
+            _container.Singleton<Services.ITvBridgeFactory, Services.TvBridgeFactory>();
+            _container.Singleton<Services.IObservableRestClientFactory, Services.ObservableRestClientFactory>();
+
             _container.PerRequest<ViewModels.ShellViewModel>();
             _container.PerRequest<ViewModels.SettingsViewModel>();
         }

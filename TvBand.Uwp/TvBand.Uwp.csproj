@@ -97,20 +97,26 @@
     </Compile>
     <Compile Include="Models\TvSettings.cs" />
     <Compile Include="Models\TvState.cs" />
-    <Compile Include="Models\TvStateMutators.cs" />
+    <Compile Include="Services\ObservableRestClientFactory.cs" />
+    <Compile Include="Services\TvStateMutators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ObservableRestClient.cs" />
     <Compile Include="Services\TvBridge.cs" />
     <Compile Include="Services\TvBridgeFactory.cs" />
     <Compile Include="Services\TvFacade.cs" />
+    <Compile Include="Services\TvFacadeFactory.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="ViewModels\TvControlViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TvControlView.xaml.cs">
+      <DependentUpon>TvControlView.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -141,6 +147,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\ShellView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TvControlView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

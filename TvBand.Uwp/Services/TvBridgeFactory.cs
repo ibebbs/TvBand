@@ -7,15 +7,16 @@
 
     internal class TvBridgeFactory : ITvBridgeFactory
     {
-        private readonly IObservableRestClient _observableRestClient;
+        private readonly IObservableRestClientFactory _observableRestClientFactory;
 
-        public TvBridgeFactory(IObservableRestClient observableRestClient)
+        public TvBridgeFactory(IObservableRestClientFactory observableRestClientFactory)
         {
-            _observableRestClient = observableRestClient;
+            _observableRestClientFactory = observableRestClientFactory;
         }
+
         public ITvBridge Create(Models.ITvSettings settings)
         {
-            return new TvBridge(_observableRestClient, settings);
+            return new TvBridge(_observableRestClientFactory, settings);
         }
     }
 }

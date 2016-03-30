@@ -85,7 +85,7 @@ namespace TvBand.Uwp.Services
                         request.Disposable = Observable
                             .FromAsync(() => client.GetAsync(requestUri))
                             .Select(ContentFromHttpResponseMessage)
-                            .SelectMany(content => DeserializeContent<T>(content, deserializer))
+                            .SelectMany(content => DeserializeContent(content, deserializer))
                             .SubscribeOn(_scheduler)
                             .Subscribe(observer);
                     }
