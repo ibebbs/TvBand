@@ -47,8 +47,9 @@ namespace TvBand.Uwp.Services
                     .StartWith(0)
                     .SelectMany(interval => observableRestClient.Get<Philips.Dto.System>(SystemUri).Select(Option.Some).Catch<Option<Philips.Dto.System>, Exception>(ex => Observable.Return(Option.None<Philips.Dto.System>())))
                     .Select(option => option.IsSome)
-                    .TakeWhile(connected => !connected))
+                    .TakeUntil(connected => connected))
                 .Switch()
+                .Do(connected => System.Diagnostics.Debug.WriteLine(connected))
                 .Publish()
                 .RefCount();
 
@@ -93,6 +94,21 @@ namespace TvBand.Uwp.Services
                     return Observable.Return(default(T));
                 }
             );
+        }
+
+        public static IObservable<T> TakeUntil<T>(this IObservable<T> source, Func<T, bool> predicate)
+        {
+            return Observable.Create<T>(
+                o => source.Subscribe(
+                    x =>
+                    {
+                        o.OnNext(x);
+                        if (predicate(x))
+                            o.OnCompleted();
+                    },
+                o.OnError,
+                o.OnCompleted
+            ));
         }
     }
 }

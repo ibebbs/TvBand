@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <SplitView IsPaneOpen="{Binding PaneOpen}" DisplayMode="CompactOverlay" CompactPaneLength="50" OpenPaneLength="250">
+    <SplitView IsPaneOpen="{Binding PaneOpen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMode="CompactOverlay" CompactPaneLength="50" OpenPaneLength="250">
         <SplitView.Content>
             <Grid>
                 <!--Frame cm:Message.Attach="[Event Loaded] = [SetupNavigationService($source)]" DataContext="{x:Null}" /-->
