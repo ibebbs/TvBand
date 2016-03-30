@@ -33,6 +33,7 @@ namespace TvBand.Uwp
 
             // Make sure to register your containers here
             _container.PerRequest<ViewModels.ShellViewModel>();
+            _container.PerRequest<ViewModels.SettingsViewModel>();
         }
 
         /// <summary>

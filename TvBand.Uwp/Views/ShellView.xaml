@@ -8,15 +8,48 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <SplitView IsPaneOpen="{Binding PaneOpen}" DisplayMode="CompactOverlay" CompactPaneLength="50" OpenPaneLength="150">
+    <SplitView IsPaneOpen="{Binding PaneOpen}" DisplayMode="CompactOverlay" CompactPaneLength="50" OpenPaneLength="250">
         <SplitView.Content>
             <Frame cm:Message.Attach="[Event Loaded] = [SetupNavigationService($source)]" DataContext="{x:Null}" />
         </SplitView.Content>
         <SplitView.Pane>
-            <StackPanel>
-                <ToggleButton IsChecked="{Binding PaneOpen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontFamily="Segoe MDL2 Assets" Content="&#xE700;" Width="50" Height="50" Background="Transparent"/>
-                <Button Command="{Binding NavigateToSettingsCommand}" Content="&#xE115;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" />
-            </StackPanel>
+            <Grid VerticalAlignment="Stretch">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+                <ToggleButton Grid.Row="0" Grid.Column="0" IsChecked="{Binding PaneOpen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontFamily="Segoe MDL2 Assets" Content="&#xE700;" Width="50" Height="50" Background="Transparent"/>
+                <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition />
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Settings" FontWeight="ExtraBold" Margin="4"/>
+                    <Line Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Stroke="Black" StrokeThickness="1" Margin="4" />
+                    <TextBlock Grid.Row="2" Text="TV IP Address" FontWeight="ExtraLight" Margin="4"/>
+                    <TextBox Grid.Row="3" Text="192.168.1.62" HorizontalAlignment="Stretch" Margin="4,0"/>
+                    <TextBlock Grid.Row="4" Text="Reconnection Interval" FontWeight="ExtraLight" Margin="4"/>
+                    <StackPanel Grid.Row="5" Orientation="Horizontal" >
+                        <TextBox Text="10" HorizontalAlignment="Stretch" Margin="4,0"/>
+                        <TextBlock Text="seconds" FontWeight="ExtraLight" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="7">
+                        <Button Content="Save" Margin="4"/>
+                        <Button Content="Cancel" Margin="4"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
         </SplitView.Pane>
     </SplitView>
 </Page>

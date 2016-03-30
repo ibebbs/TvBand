@@ -8,7 +8,13 @@ using System.Threading.Tasks;
 
 namespace TvBand.Uwp.ViewModels
 {
-    public class SettingsViewModel : Screen
+    public interface ISettingsViewModel : IScreen
+    {
+        string TvAddress { get; set; }
+        int ConnectionIntervalSeconds { get; set; }
+    }
+
+    public class SettingsViewModel : Screen, ISettingsViewModel
     {
         private readonly ObservableProperty<string> _tvAddress;
         private readonly ObservableProperty<int> _connectionIntervalSeconds;

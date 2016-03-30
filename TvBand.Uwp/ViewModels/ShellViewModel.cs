@@ -1,11 +1,9 @@
 ﻿using Caliburn.Micro;
 using Caliburn.Micro.Reactive.Extensions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Disposables;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Windows.Input;
 using Windows.UI.Xaml.Controls;
 
@@ -15,7 +13,11 @@ namespace TvBand.Uwp.ViewModels
     {
         private readonly WinRTContainer _container;
         private readonly ObservableProperty<bool> _paneOpen;
-        private readonly ObservableCommand _navigateToSettingsCommand;
+        private readonly ObservableProperty<string> _tvAddress;
+        private readonly ObservableProperty<int> _reconnectionInterval;
+        private readonly ObservableCommand _saveSettings;
+        private readonly ObservableCommand _cancelSettings;
+        private readonly Subject<Models.ITvSettings> _settings;
 
         private INavigationService _navigationService;
         private IDisposable _behaviors;
@@ -23,15 +25,31 @@ namespace TvBand.Uwp.ViewModels
         public ShellViewModel(WinRTContainer container)
         {
             _container = container;
+
+            _settings = new Subject<Models.ITvSettings>();
             _paneOpen = new ObservableProperty<bool>(this, false, () => PaneOpen);
-            _navigateToSettingsCommand = new ObservableCommand();
+            _tvAddress = new ObservableProperty<string>(this, "192.168.1.61", () => TvAddress);
+            _reconnectionInterval = new ObservableProperty<int>(this, 10, () => ReconnectionInterval);
+            _saveSettings = new ObservableCommand();
+            _cancelSettings = new ObservableCommand();
         }
 
         protected override void OnActivate()
         {
             _behaviors = new CompositeDisposable(
-                ShouldNavigateToSettingsWhenNavigateToSettingsCommandIsExecuted()
+                ShouldSaveSettingsWhenTheSaveSettingsCommandIsExecuted(),
+                ShouldRevertSettingsWhenTheCancelSettingsCommandIsExecuted()
             );
+        }
+
+        private IDisposable ShouldSaveSettingsWhenTheSaveSettingsCommandIsExecuted()
+        {
+            throw new NotImplementedException();
+        }
+
+        private IDisposable ShouldRevertSettingsWhenTheCancelSettingsCommandIsExecuted()
+        {
+            throw new NotImplementedException();
         }
 
         protected override void OnDeactivate(bool close)
@@ -46,11 +64,6 @@ namespace TvBand.Uwp.ViewModels
             }
         }
 
-        private IDisposable ShouldNavigateToSettingsWhenNavigateToSettingsCommandIsExecuted()
-        {
-            return _navigateToSettingsCommand.Subscribe(_ => _navigationService.Navigate<SettingsViewModel>());
-        }
-
         public void SetupNavigationService(Frame frame)
         {
             _navigationService = _container.RegisterNavigationService(frame);
@@ -62,9 +75,16 @@ namespace TvBand.Uwp.ViewModels
             set { _paneOpen.Set(value); }
         }
 
-        public ICommand NavigateToSettingsCommand
+        public string TvAddress
         {
-            get { return _navigateToSettingsCommand; }
+            get { return _tvAddress.Get(); }
+            set { _tvAddress.Set(value); }
+        }
+
+        public int ReconnectionInterval
+        {
+            get { return _reconnectionInterval.Get(); }
+            set { _reconnectionInterval.Set(value); }
         }
     }
 }
